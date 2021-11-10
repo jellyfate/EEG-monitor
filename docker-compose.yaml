@@ -1,0 +1,27 @@
+version: '3.9'
+services:
+  redis:
+    image: redislabs/redistimeseries
+    entrypoint:
+      redis-server
+        --loadmodule /usr/lib/redis/modules/redistimeseries.so
+        --appendonly yes
+    volumes: 
+      - "redis_data:/data"
+    ports:
+      - "6379:6379"
+  grafana:
+    image: grafana/grafana
+    environment:
+      - GF_INSTALL_PLUGINS=redis-datasource
+    volumes:
+      - "grafana-storage:/var/lib/grafana"
+      - "./grafana.ini:/etc/grafana/grafana.ini"
+    # command: sh -c "grafana-cli plugins install redis-datasource"
+    ports:
+      - "3000:3000"
+volumes:
+    redis_data:
+      external: true
+    grafana-storage:
+      external: true
