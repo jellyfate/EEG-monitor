@@ -5,7 +5,6 @@ from redis.exceptions import ResponseError
 from redistimeseries.client import Client as RedisClient
 
 from globals import *
-from mne_translator import MNETranslator
 
 
 class Database:
@@ -19,13 +18,12 @@ class Database:
         self.timestamp_channel = CHANNELS_MAPPING.index('Timestamp')
         self.channels_names = tuple(
             ch for ch in CHANNELS_MAPPING if ch not in ('Timestamp', None))
-        self.mne_translator = MNETranslator()
 
-    def _create_timeseries_storage(self, name):
+    def _create_timeseries_storage(self, name, labels):
         try:
-            self.connection.info(channel)
+            self.connection.info(name)
         except ResponseError as e:
-            self.connection.create(channel, labels={'eeg': 'microvolts'})
+            self.connection.create(name, labels=labels)
 
     def connect(self):
         self.connection = RedisClient(
@@ -34,7 +32,19 @@ class Database:
             password=self.password
         )
         for channel in self.channels_names:
-            self._create_timeseries_storage(channel)
+            self._create_timeseries_storage(channel, {'eeg': 'microvolts'})
+            for band in FREQ_BANDS:
+                # self.connection.alter(f'{channel}-{band}', labels={'channel': channel, 'band': band})
+                self._create_timeseries_storage(
+                    f'{channel}-{band}', {'channel': channel, 'band': band})
+
+        for band in FREQ_BANDS:
+            # self.connection.alter(f'{channel}-{band}', labels={'channel': channel, 'band': band})
+            self._create_timeseries_storage(
+                band, {'band': band, 'type': 'total_band_fraction'})
+
+        for condition in CONDITIONS:
+            self._create_timeseries_storage(condition, {'type': 'condition'})
 
     def disconect(self):
         self.connection.redis.close()
@@ -55,12 +65,14 @@ class Database:
         data_as_tupples = self._transform_data_to_list_of_tuples(data)
         self.connection.madd(data_as_tupples)
 
-    def pull_eeg(self, start, end, to_raw_array=False):
-        stored_eeg = self.connection.mrange(start, end, ('eeg=microvolts',))
-        if not to_raw_array:
-            return stored_eeg
-        raw_array = self.mne_translator.translate_to_raw_array(stored_eeg)
-        return raw_array
+    def pull_eeg(self, start, end):
+        return self.connection.mrange(start, end, ('eeg=microvolts',))
 
     def store_processing_result(self, key, timestamp, value):
-        self.connection.add(key, timestamp, value)
+        return self.connection.add(key, timestamp, value)
+
+    def store_multiple_processing_result(self, list_of_tuples):
+        return self.connection.madd(list_of_tuples)
+
+    def pull_processing_result(self, filters, start, end):
+        return self.connection.mrange(start, end, filters)

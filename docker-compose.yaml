@@ -5,6 +5,7 @@ services:
     entrypoint:
       redis-server
         --loadmodule /usr/lib/redis/modules/redistimeseries.so
+        DUPLICATE_POLICY LAST
         --appendonly yes
     volumes: 
       - "redis_data:/data"
