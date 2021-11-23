@@ -21,6 +21,8 @@ services:
     # command: sh -c "grafana-cli plugins install redis-datasource"
     ports:
       - "3000:3000"
+  eeg-app:
+    build: .
 volumes:
     redis_data:
       external: true

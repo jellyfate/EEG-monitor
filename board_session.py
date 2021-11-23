@@ -21,14 +21,3 @@ class BoardSession:
 
     def get_data(self):
         return self.board.get_board_data()
-
-    def __enter__(self):
-        self.start_stream()
-        return self.board
-
-    def __exit__(self, exc_type, exc_value, tb):
-        if exc_type is not None:
-            traceback.print_exception(exc_type, exc_value, tb)
-            # return False # uncomment to pass exception through
-        self.stop_stream()
-        return True

@@ -34,14 +34,18 @@ class Database:
         for channel in self.channels_names:
             self._create_timeseries_storage(channel, {'eeg': 'microvolts'})
             for band in FREQ_BANDS:
-                # self.connection.alter(f'{channel}-{band}', labels={'channel': channel, 'band': band})
+                # self.connection.alter(f'{channel}-{band}', labels={'channel': channel, 'band': band, 'type':'power'})
                 self._create_timeseries_storage(
-                    f'{channel}-{band}', {'channel': channel, 'band': band})
+                    f'{channel}-{band}', {'channel': channel, 'band': band, 'type':'power'})
+                self._create_timeseries_storage(
+                    f'{channel}-{band}-freq', {'channel': channel, 'band': band, 'type':'freq'})
 
         for band in FREQ_BANDS:
             # self.connection.alter(f'{channel}-{band}', labels={'channel': channel, 'band': band})
             self._create_timeseries_storage(
                 band, {'band': band, 'type': 'total_band_fraction'})
+            self._create_timeseries_storage(
+                f'{band}-freq', {'band': band, 'type': 'mean_band_freq'})
 
         for condition in CONDITIONS:
             self._create_timeseries_storage(condition, {'type': 'condition'})

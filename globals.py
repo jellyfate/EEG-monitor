@@ -20,11 +20,14 @@ REDIS_PASSWORD = None
 
 # PROCESSING SETTINGS
 FREQ_BANDS = dict(
-    delta=(2, 5),
-    theta=(5, 7),
+    delta=(1, 4),
+    theta=(4, 8),
     alpha=(7, 13),
     beta=(13, 30),
     gamma=(30, 47)
 )
 CONDITIONS = ['stress', 'concentration', 'frustration', 'relaxation']
 MA_PERIOD = 3
+INTERVAL = 1
+START_OFFSET = 3
+END_OFFSET = 3
