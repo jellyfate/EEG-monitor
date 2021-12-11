@@ -1,0 +1,7 @@
+brainflow==4.8.2
+redistimeseries==1.4.4
+redis==3.5.3
+timeloop==1.0.2
+mne==0.24.1 
+numpy==1.21.4
+scipy==1.7.3 
